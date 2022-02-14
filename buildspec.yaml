@@ -1,0 +1,42 @@
+version: 0.2
+env:
+  variables:
+    DOCKER_BUILDKIT: "1"
+phases:
+  install:
+    runtime-versions:
+      docker: latest
+  pre_build:
+    commands:
+      - echo ${AWS_DEFAULT_REGION}
+      - echo ${AWS_ACCOUNT_ID}
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - $(aws ecr get-login --region ${AWS_DEFAULT_REGION} --no-include-email)
+      - COMMIT_HASH=$(echo ${CODEBUILD_RESOLVED_SOURCE_VERSION} | cut -c 1-7)
+      - IMAGE_TAG=build-$(echo ${CODEBUILD_BUILD_ID} | awk -F":" '{print $2}')
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t ${AWS_ECR_BE}:${IMAGE_TAG} -f Dockerfile .
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push ${AWS_ECR_BE}:${IMAGE_TAG}
+      - printf '{"ImageURI":"%s"}' $AWS_ECR_BE:$IMAGE_TAG > imageDetail.json
+      - cat imageDetail.json
+artifacts:
+  files:
+    - appspec.yaml
+    - taskdef.json
+    - imageDetail.json
+  secondary-artifacts:
+    DefinitionArtifact:
+      files:
+        - appspec.yaml
+        - taskdef.json
+    ImageArtifact:
+      files:
+        - imageDetail.json

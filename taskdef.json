@@ -1,0 +1,59 @@
+{
+    "executionRoleArn": "arn:aws:iam::012881927014:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+        {
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "secretOptions": null,
+                "options": {
+                    "awslogs-group": "/ecs/cw-microscan-backend",
+                    "awslogs-region": "eu-west-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "portMappings": [
+                {
+                    "hostPort": 80,
+                    "protocol": "tcp",
+                    "containerPort": 80
+                }
+            ],
+            "mountPoints": [
+                {
+                    "readOnly": null,
+                    "containerPath": "/code/efs",
+                    "sourceVolume": "efs"
+                }
+            ],
+            "image": "<IMAGE1_NAME>",
+            "name": "cw-microscan-backend"
+        }
+    ],
+    "memory": "1024",
+    "taskRoleArn": "arn:aws:iam::012881927014:role/ecsTaskExecutionRole",
+    "family": "cw-microscan-be",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "networkMode": "awsvpc",
+    "cpu": "512",
+    "revision": 5,
+    "volumes": [
+        {
+            "fsxWindowsFileServerVolumeConfiguration": null,
+            "efsVolumeConfiguration": {
+                "transitEncryptionPort": null,
+                "fileSystemId": "fs-6b9a015f",
+                "authorizationConfig": {
+                    "iam": "DISABLED",
+                    "accessPointId": null
+                },
+                "transitEncryption": "DISABLED",
+                "rootDirectory": "/"
+            },
+            "name": "efs",
+            "host": null,
+            "dockerVolumeConfiguration": null
+        }
+    ]
+}
